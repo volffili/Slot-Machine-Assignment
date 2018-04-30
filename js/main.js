@@ -15,18 +15,33 @@ resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
 var slotMachine = new SlotMachine(200);
-var touchHandler = new TouchHandler(slotMachine.checkTouchPressed,slotMachine.checkTouchReleased);
+var inputListener = new InputListener(slotMachine.checkTouchPressed,slotMachine.checkTouchReleased);
 
 //start loop
 var lastUpdate = Date.now();
 var time_elapsed = 0;
 
-//requestAnimationFrame is not available by older browsers supporting ES5.1 
-var loop = setInterval(step, 0);
+//maintaining compatibility for old browser 
+if ( !window.requestAnimationFrame ) {
+
+    window.requestAnimationFrame = ( function() {
+
+        return window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function( callback, element ) {
+            window.setTimeout( callback, 1000 / 60 );
+        };
+
+    } )();
+}
 
 function startup(){
-    touchHandler.startup();
+    inputListener.startup();
 }
+
+window.requestAnimationFrame(step);
 
 //game loop
 function step() {
@@ -36,12 +51,17 @@ function step() {
     var dt = (now - lastUpdate)/1000;
     lastUpdate = now;
 
+    //console.log(dt);
+
     update(dt);
     render(dt);
+
+    window.requestAnimationFrame(step);
 }
 
 function update(dt){
-	slotMachine.update(dt);
+	slotMachine.update(dt,canvas.width/2,canvas.height/2,canvas.width,canvas.height);
+
 }
 
 function render(dt){
