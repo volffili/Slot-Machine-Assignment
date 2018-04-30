@@ -1,25 +1,40 @@
 function SlotMachine(initial_credit,x,y){
 	this.spriteSlotMachine = new Sprite('./assets/slot_machine.png');
 
-	this.buttons = [
-		new Button('./assets/spin_button_pressed.png','./assets/spin_button_released.png'),
-		new Button('./assets/decrease_bet_button_pressed.png','./assets/decrease_bet_button_released.png'),
-		new Button('./assets/increase_bet_button_pressed.png','./assets/increase_bet_button_released.png')
-	];
-	
-	this.buttons[0].releaseCallback = function(){
-		console.log("spin");
+	this.spinCallback = function(){
+		if(this.bet_size <= this.credit){
+			this.credit -= this.bet_size;
+			console.log("spin");
+			this.roll();	
+		}
 	};
 	
-	this.buttons[1].releaseCallback = function(){
-		console.log("decrease_bet");
+	this.decreaseBetCallback = function(){
+		if(this.bet_size > this.bet_size_changer){
+			this.bet_size -= this.bet_size_changer;
+			console.log("decrease_bet by "+this.bet_size_changer);
+		}
 	};
 	
-	this.buttons[2].releaseCallback = function(){
-		console.log("increase_bet");
+	this.increaseBetCallback = function(){
+		if(this.bet_size < this.bet_size_changer*10){
+			this.bet_size += this.bet_size_changer;
+			console.log("increase_bet by "+this.bet_size_changer);
+		}
 	};
 
-	this.slot = [new Slot(),new Slot(),new Slot()];
+	this.spinCallback = this.spinCallback.bind(this);
+	this.decreaseBetCallback = this.decreaseBetCallback.bind(this);
+	this.increaseBetCallback = this.increaseBetCallback.bind(this);
+	this.finishedRoll = this.finishedRoll.bind(this);
+
+	this.buttons = [
+		new Button('./assets/spin_button_pressed.png','./assets/spin_button_released.png',this.spinCallback),
+		new Button('./assets/decrease_bet_button_pressed.png','./assets/decrease_bet_button_released.png',this.decreaseBetCallback),
+		new Button('./assets/increase_bet_button_pressed.png','./assets/increase_bet_button_released.png',this.increaseBetCallback)
+	];
+	
+	this.slots = [new Slot(),new Slot(),new Slot()];
 
 	if(initial_credit){
 		this.credit = initial_credit;
@@ -28,19 +43,23 @@ function SlotMachine(initial_credit,x,y){
 	}
 
 	this.display_credit = this.credit;
-	this.bet_size = Math.floor(this.credit/50);
+	this.bet_size_changer = Math.floor(this.credit/100);
+	this.bet_size = this.bet_size_changer*4;
 
 	this.checkTouchPressed = this.checkTouchPressed.bind(this);
 	this.checkTouchReleased = this.checkTouchReleased.bind(this);
 
 	this.x = x || 0;
 	this.y = y || 0;
+
+	this.finishedRolls = 0;
+	this.win_multiplier = 16;
 }
 
 SlotMachine.prototype.checkTouchPressed = function(x,y){
 	for(var i = 0; i < this.buttons.length; ++i){
     	if(this.buttons[i].isPointInside(x,y)){
-    		console.log("pressed "+i );
+    		//console.log("pressed "+i );
     		this.buttons[i].press();
     	}
 	}
@@ -48,8 +67,9 @@ SlotMachine.prototype.checkTouchPressed = function(x,y){
 
 SlotMachine.prototype.checkTouchReleased = function(x,y){
 	for(var i = 0; i < this.buttons.length; ++i){
-		console.log("released "+i );
-		this.buttons[i].release();    	
+		//console.log("released "+i );
+		if(this.buttons[i].pressed)
+			this.buttons[i].release();    	
 	}
 }
 
@@ -91,20 +111,20 @@ SlotMachine.prototype.draw = function(canvas,ctx){
 
     //Value that looks the best, found by trial and error
     var gap_divisor = 3.42;
-    for(var i=0; i < this.slot.length; ++i){
-    	this.slot[i].draw(ctx,this.x+w/gap_divisor*(i-1),this.y-h/3,scale,scale);
+    for(var i=0; i < this.slots.length; ++i){
+    	this.slots[i].draw(ctx,this.x+w/gap_divisor*(i-1),this.y-h/3,scale,scale);
     }
 
     //draw score
-    ctx.fillStyle="#000000";
+    ctx.fillStyle="#aaaaaa";
     var fontSize = 0.03*canvas.width;
     ctx.font = (fontSize|0) + 'px Arial';
 
 	ctx.textAlign="left"; 
-    ctx.fillText("credit: "+this.display_credit,this.x-w/2+w*0.025,this.y+h/2*1.3-h/3);
+    ctx.fillText("credit: "+Math.round(this.display_credit),this.x-w/2+w*0.025,this.y+h/2*1.4-h/3);
 
 	ctx.textAlign="right";  
-    ctx.fillText("bet size: "+this.bet_size,this.x+w/2-w*0.025,this.y+h/2*1.3-h/3);
+    ctx.fillText("bet size: "+this.bet_size,this.x+w/2-w*0.025,this.y+h/2*1.4-h/3);
 
     //draw buttons
     for(var i = 0; i < this.buttons.length; ++i ){
@@ -115,20 +135,46 @@ SlotMachine.prototype.draw = function(canvas,ctx){
 
 SlotMachine.prototype.bet = function(bet_size){
 	this.roll();
-	this.changeCredit(-bet_size);
+	this.credit -= bet_size;
+}
+
+SlotMachine.prototype.checkForWin = function(){
+	
+	if(this.finishedRolls < this.slots.length)
+		return;
+
+	console.log(this.slots[0].position+" ?= "+this.slots[1].position+" ?= "+this.slots[2].position);
+
+	if(this.slots[0].position == this.slots[1].position && this.slots[1].position == this.slots[2].position){
+		this.credit += this.bet_size*this.win_multiplier;
+		console.log("You won "+this.bet_size*this.win_multiplier+" credits");
+	}else{
+		console.log("You lost ");
+	}
+	this.finishedRolls = 0;
+}
+
+
+SlotMachine.prototype.finishedRoll = function(){
+	this.finishedRolls += 1;
+	this.checkForWin();
 }
 
 SlotMachine.prototype.roll = function(){
 	//roll all the individual slots
-	for(var i=0;i<this.slot.length;++i){
-		this.slot[i].roll(5+Math.random()*10,i+2);
+	for(var i=0;i<this.slots.length;++i){
+		this.slots[i].roll(7.5+Math.random()*15,i+2,this.finishedRoll);
 	}
 }
 
 SlotMachine.prototype.update = function(dt,x,y,canvas_width,canvas_height){
 
+	if(this.credit != this.display_credit){
+		this.display_credit = (this.credit-this.display_credit)*dt*10+this.display_credit;
+	}
+
     slotMachine.updatePosition(x,y,canvas_width,canvas_height);
-	for(var i=0;i<this.slot.length;++i){
-		this.slot[i].update(dt);
+	for(var i=0;i<this.slots.length;++i){
+		this.slots[i].update(dt);
 	}
 }

@@ -64,6 +64,10 @@ function update(dt){
 
 }
 
+
+
 function render(dt){
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
     slotMachine.draw(canvas,ctx,canvas.width/2,canvas.height/2)
 }

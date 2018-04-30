@@ -1,10 +1,13 @@
-function Button(spr_src_press,spr_src_rel,x,y){
+function Button(spr_src_press,spr_src_rel,release_callback,press_callback,x,y){
 	this.spritePressed = new Sprite(spr_src_press);
 	this.spriteReleased = new Sprite(spr_src_rel);
 	this.currentSprite = this.spriteReleased;
 	this.updatePositionAndScale();
 
 	this.pressed = false;
+
+	this.release_callback = release_callback || function(){}
+	this.press_callback = press_callback || function(){}
 
 	this.x = x || 0;
 	this.y = y || 0;
@@ -25,12 +28,16 @@ Button.prototype.draw = function(ctx){
 Button.prototype.release = function(){
 	this.pressed = false;
 	this.currentSprite = this.spriteReleased;
+
+	this.release_callback();
 }
 
 
 Button.prototype.press = function(){
 	this.pressed = true;
 	this.currentSprite = this.spritePressed;
+	
+	this.press_callback();
 }
 
 Button.prototype.isPointInside = function(x,y){

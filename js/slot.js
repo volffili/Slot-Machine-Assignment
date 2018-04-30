@@ -7,14 +7,17 @@ function Slot(){
 	this.end_time = 0;
 	this.time_elapsed = 0;
 	this.state = 'still';
+
+	this.finishedRollCallback = function(){};
 }
 
-Slot.prototype.roll = function(initial_speed,end_time){
+Slot.prototype.roll = function(initial_speed,end_time,finishedRollCallback){
 	this.state = 'rolling';	
 	this.initial_speed = initial_speed;
 	this.speed = initial_speed;
 	this.end_time = end_time;
 	this.time_elapsed = 0;
+	this.finishedRollCallback = finishedRollCallback;
 }
 
 Slot.prototype.update = function(dt){
@@ -37,16 +40,18 @@ Slot.prototype.update = function(dt){
 				//align the icon in the slot machine
 				this.speed = 0;
 				this.initial_speed = 0;
-				this.position = (Math.ceil(this.position)-this.position)*0.5+this.position
+				this.position = (Math.round(this.position)-this.position)*0.5+this.position
 
 				//correction so the icon is perfectly aligned				
 				if(time_left <= 0){
 					console.log(this.time_elapsed);
 					this.state = 'still';
 
-					this.position = Math.ceil(this.position);
+					this.position = Math.round(this.position);
 					this.time_elapsed = 0;
 					this.end_time = this.time_elapsed;
+
+					this.finishedRollCallback();
 				}
 			}else{
 				this.position += this.speed*dt;

@@ -27,7 +27,7 @@ InputListener.prototype.startup = function(){
     this.el.addEventListener("mousedown", this.handleMouseDown, false);
     this.el.addEventListener("mouseup", this.handleMouseUp, false);
 
-    console.log("Touch initialized.");
+    //console.log("Touch initialized.");
 }
 
 InputListener.prototype.ongoingTouchIndexById = function(idToFind) {
@@ -56,7 +56,7 @@ InputListener.prototype.removeTouchFromArray = function (touches){
 
 InputListener.prototype.handleStart = function(evt){
 	evt.preventDefault();
-	console.log("touchstart");
+	//console.log("touchstart");
 	var touches = evt.changedTouches;
 
 	for (var i = 0; i < touches.length; ++i) {
@@ -67,7 +67,7 @@ InputListener.prototype.handleStart = function(evt){
 
 InputListener.prototype.handleEnd = function(evt){
 	evt.preventDefault();
-	console.log("touchend");
+	//console.log("touchend");
 	var removed = this.removeTouchFromArray(evt.changedTouches);
 	for(var i = 0; i < removed.length; ++i){
 		this.releaseCallback(removed[i].pageX,removed[i].pageY);
@@ -76,18 +76,18 @@ InputListener.prototype.handleEnd = function(evt){
 
 InputListener.prototype.handleMouseDown = function(evt){
 	evt.preventDefault();
-	console.log("mousedown");
+	//console.log("mousedown");
 	this.pressCallback(evt.pageX,evt.pageY);
 }
 
 InputListener.prototype.handleMouseUp = function(evt){
 	evt.preventDefault();
-	console.log("mouseup");
+	//console.log("mouseup");
 	this.releaseCallback(evt.pageX,evt.pageY);
 }
 
 InputListener.prototype.handleCancel = function(evt){
 	evt.preventDefault();
-	console.log("touchcancel");
+	//console.log("touchcancel");
 	this.removeTouchFromArray(evt.changedTouches);
 }
