@@ -1,5 +1,7 @@
 function SlotMachine(initial_credit,x,y){
-	this.spriteSlotMachine = new Sprite('./assets/slot_machine.png');
+	this.spriteSlotMachineBack = new Sprite('./assets/slot_machine_back.png');
+	this.spriteSlotMachineMid = new Sprite('./assets/slot_machine_mid.png');
+	this.spriteSlotMachineFront = new Sprite('./assets/slot_machine_front.png');
 
 	this.spinCallback = function(){
 		if(this.bet_size <= this.credit){
@@ -74,8 +76,8 @@ SlotMachine.prototype.checkTouchReleased = function(x,y){
 }
 
 SlotMachine.prototype.getScale = function(canvas_width,canvas_height){
-    var scale = canvas_width/this.spriteSlotMachine.getImageWidth()*0.5;
-    var tmp_y_scale = canvas_height/this.spriteSlotMachine.getImageHeight()*0.5;
+    var scale = canvas_width/this.spriteSlotMachineBack.getImageWidth()*0.5;
+    var tmp_y_scale = canvas_height/this.spriteSlotMachineBack.getImageHeight()*0.5;
 
     //Shrink the image the way, so it always fits the screen
     if(scale > tmp_y_scale){
@@ -88,8 +90,8 @@ SlotMachine.prototype.getScale = function(canvas_width,canvas_height){
 SlotMachine.prototype.updatePosition = function(x,y,canvas_width,canvas_height){
 
 	var scale = this.getScale(canvas_width,canvas_height);
-    var w = scale*this.spriteSlotMachine.getImageWidth();
-    var h = scale*this.spriteSlotMachine.getImageHeight();
+    var w = scale*this.spriteSlotMachineBack.getImageWidth();
+    var h = scale*this.spriteSlotMachineBack.getImageHeight();
 
 	this.x = x;
 	this.y = y;
@@ -104,27 +106,39 @@ SlotMachine.prototype.updatePosition = function(x,y,canvas_width,canvas_height){
 
 SlotMachine.prototype.draw = function(canvas,ctx){
 	var scale = this.getScale(canvas.width,canvas.height);
-    var w = scale*this.spriteSlotMachine.getImageWidth();
-    var h = scale*this.spriteSlotMachine.getImageHeight();
+    var w = scale*this.spriteSlotMachineBack.getImageWidth();
+    var h = scale*this.spriteSlotMachineBack.getImageHeight();
 
-    this.spriteSlotMachine.draw(ctx,this.x,this.y-h/3,scale,scale);
+    this.spriteSlotMachineBack.draw(ctx,this.x,this.y-h/3,scale,scale);
+
+	var tmp_canvas = document.createElement('canvas');
+	tmp_canvas.width = w*2;
+	tmp_canvas.height = h;
+	var tmp_canvas_context = tmp_canvas.getContext('2d');
 
     //Value that looks the best, found by trial and error
     var gap_divisor = 3.42;
     for(var i=0; i < this.slots.length; ++i){
-    	this.slots[i].draw(ctx,this.x+w/gap_divisor*(i-1),this.y-h/3,scale,scale);
+    	this.slots[i].draw(tmp_canvas_context,w/2+w/gap_divisor*(i-1),0,scale,scale);
     }
 
+    if(tmp_canvas.width != 0 && tmp_canvas.height != 0)
+    	ctx.drawImage(tmp_canvas,this.x-w/2,this.y-h/3-h/2);
+
     //draw score
-    ctx.fillStyle="#aaaaaa";
+    ctx.fillStyle = "#aaaaaa";
     var fontSize = 0.03*canvas.width;
     ctx.font = (fontSize|0) + 'px Arial';
+
 
 	ctx.textAlign="left"; 
     ctx.fillText("credit: "+Math.round(this.display_credit),this.x-w/2+w*0.025,this.y+h/2*1.4-h/3);
 
 	ctx.textAlign="right";  
     ctx.fillText("bet size: "+this.bet_size,this.x+w/2-w*0.025,this.y+h/2*1.4-h/3);
+
+    this.spriteSlotMachineMid.draw(ctx,this.x,this.y-h/3,scale,scale);
+    this.spriteSlotMachineFront.draw(ctx,this.x,this.y-h/3,scale,scale);
 
     //draw buttons
     for(var i = 0; i < this.buttons.length; ++i ){

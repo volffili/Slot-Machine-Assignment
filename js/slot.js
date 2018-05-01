@@ -1,7 +1,12 @@
 function Slot(){
+
+	//the slot is 2.14 x height of the icon
+	this.slotToIconHeightRatio = 2.14;
+
+	//Each icon has to be the same height!
 	this.icon = [new Sprite('./assets/banana.png'),new Sprite('./assets/cherry.png'),new Sprite('./assets/lemon.png'),new Sprite('./assets/melon.png')];
 	this.position = Math.floor(Math.random()*this.icon.length);
-	
+
 	this.speed = 0;
 	this.initial_speed = 0;
 	this.end_time = 0;
@@ -65,5 +70,23 @@ Slot.prototype.update = function(dt){
 }
 
 Slot.prototype.draw = function(ctx,x,y,x_scale,y_scale){
-	this.icon[Math.floor(this.position)].draw(ctx,x,y,x_scale,y_scale);
+
+	//Each icon has to be the same height!
+	var h = this.icon[0].getImageHeight();
+	var w = this.icon[0].getImageWidth();
+	//var shift = Math.floor(this.icon.length/2)*h*y_scale*1.5;
+
+	var dec_part = this.position % 1;
+	var gap = h*y_scale*this.slotToIconHeightRatio/3*2;
+
+	var shift_y1 = dec_part*y_scale*h*this.slotToIconHeightRatio/3*2;
+
+	//this.icon[Math.floor(this.position)].draw(ctx,x,y,x_scale,y_scale);
+	for(var i = -3; i <= 3; ++i ){
+		var tr_i = (i+this.icon.length+Math.floor(this.position))%this.icon.length;
+		this.icon[tr_i].draw(ctx,x,y-shift_y1+gap*i,x_scale,y_scale,0,0,1,1);
+	}
+
+	//this.icon[im1_pos].draw(ctx,x,y,x_scale,sh1,0,sy1,x_scale,sh1);
+	//this.icon[im2_pos].draw(ctx,0,sy2,w,sh2,x,y+gap,x_scale*w,sh2);
 }

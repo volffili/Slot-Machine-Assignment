@@ -29,10 +29,15 @@ Sprite.prototype.getImageHeight = function(){
 	}
 }
 
-Sprite.prototype.draw = function(ctx,x,y,x_scale,y_scale){
+Sprite.prototype.draw = function(ctx,x,y,x_scale,y_scale,sx,sy,s_x_scale,s_y_scale){
 
   if(!ctx || !this.loaded)
   	return;
+
+  sx = sx || 0;
+  sy = sy || 0;
+  s_x_scale = s_x_scale || 1;
+  s_y_scale = s_y_scale || 1;
 
   //default values
   x = x || 0;
@@ -40,8 +45,10 @@ Sprite.prototype.draw = function(ctx,x,y,x_scale,y_scale){
   x_scale = x_scale || 1;
   y_scale = y_scale || 1;
 
-  var w = x_scale*this.img.width;
-  var h = y_scale*this.img.height;
-  
-  ctx.drawImage(this.img,x-w*this.x_origin,y-h*this.x_origin,w,h);
+  var sw = s_x_scale*this.img.width;
+  var sh = s_y_scale*this.img.height;
+  var dw = x_scale*this.img.width;
+  var dh = y_scale*this.img.height;
+
+  ctx.drawImage(this.img,sx,sy,sw,sh,x-dw*this.x_origin,y-dh*this.y_origin,dw,dh);
 }
