@@ -14,7 +14,7 @@ function resizeCanvas(){
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-var slotMachine = new SlotMachine(200);
+var slotMachine = new SlotMachine();
 var inputListener = new InputListener(slotMachine.checkTouchPressed,slotMachine.checkTouchReleased);
 
 //start loop

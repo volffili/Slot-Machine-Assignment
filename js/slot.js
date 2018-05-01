@@ -4,7 +4,7 @@ function Slot(){
 	this.slotToIconHeightRatio = 2.14;
 
 	//Each icon has to be the same height!
-	this.icon = [new Sprite('./assets/banana.png'),new Sprite('./assets/cherry.png'),new Sprite('./assets/lemon.png'),new Sprite('./assets/melon.png')];
+	this.icon = [new Sprite('./assets/banana.png'),new Sprite('./assets/cherry.png'),new Sprite('./assets/melon.png')];
 	this.position = Math.floor(Math.random()*this.icon.length);
 
 	this.speed = 0;
@@ -12,6 +12,7 @@ function Slot(){
 	this.end_time = 0;
 	this.time_elapsed = 0;
 	this.state = 'still';
+	this.generateTreshold();
 
 	this.finishedRollCallback = function(){};
 }
@@ -25,11 +26,15 @@ Slot.prototype.roll = function(initial_speed,end_time,finishedRollCallback){
 	this.finishedRollCallback = finishedRollCallback;
 }
 
+Slot.prototype.generateTreshold = function(){
+	this.stopTreshold = Math.random()/2+0.75;
+}
+
 Slot.prototype.update = function(dt){
 	switch(this.state){
 		
 		case 'still':
-			
+			this.generateTreshold();
 		break;
 		
 		case 'rolling':
@@ -37,22 +42,22 @@ Slot.prototype.update = function(dt){
 			var time_left = this.end_time - this.time_elapsed;		
 	
 			//slow down at the end
-			if(time_left < 1.5 && time_left > 0.5){
-				this.speed = this.initial_speed*(time_left-0.5);
+			if(time_left < 2.5 && time_left > 1){
+				this.speed = this.initial_speed*(time_left-this.stopTreshold)/this.end_time;
 			}
 
-			if(time_left <= 0.5){
+			if(time_left <= 1){
 				//align the icon in the slot machine
 				this.speed = 0;
 				this.initial_speed = 0;
-				this.position = (Math.round(this.position)-this.position)*0.5+this.position
+				this.position = (Math.round(this.position)-this.position)*dt*7.5+this.position
 
 				//correction so the icon is perfectly aligned				
 				if(time_left <= 0){
 					console.log(this.time_elapsed);
 					this.state = 'still';
 
-					this.position = Math.round(this.position);
+					this.position = Math.round(this.position)%this.icon.length;
 					this.time_elapsed = 0;
 					this.end_time = this.time_elapsed;
 
@@ -83,7 +88,8 @@ Slot.prototype.draw = function(ctx,x,y,x_scale,y_scale){
 
 	//this.icon[Math.floor(this.position)].draw(ctx,x,y,x_scale,y_scale);
 	for(var i = -3; i <= 3; ++i ){
-		var tr_i = (i+this.icon.length+Math.floor(this.position))%this.icon.length;
+		var arbitrary = 10;
+		var tr_i = (i+arbitrary+Math.floor(this.position))%this.icon.length;
 		this.icon[tr_i].draw(ctx,x,y-shift_y1+gap*i,x_scale,y_scale,0,0,1,1);
 	}
 
