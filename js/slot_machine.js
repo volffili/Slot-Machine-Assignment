@@ -3,6 +3,7 @@ function SlotMachine(initial_credit,x,y){
 	this.spriteSlotMachineMid = new Sprite('./assets/slot_machine_mid.png');
 	this.spriteSlotMachineFront = new Sprite('./assets/slot_machine_glow.png');
 	this.spinning = false;
+	this.sn_coin = new Audio("./assets/coin_drop.wav");
 
 	this.pressSpinCallback = function(){
 		if(this.bet_size > this.credit || this.spinning || this.bet_size <= 0){
@@ -69,6 +70,8 @@ function SlotMachine(initial_credit,x,y){
 		this.credit = 50;
 	}
 
+	this.initial_credit = this.credit;
+
 	this.bet_max_amount = 3;
 	this.display_credit = this.credit;
 	this.bet_size_changer = 1;
@@ -102,8 +105,8 @@ SlotMachine.prototype.checkTouchReleased = function(x,y){
 }
 
 SlotMachine.prototype.getScale = function(canvas_width,canvas_height){
-    var scale = canvas_width/this.spriteSlotMachineBack.getImageWidth()*0.5;
-    var tmp_y_scale = canvas_height/this.spriteSlotMachineBack.getImageHeight()*0.5;
+    var scale = canvas_width/this.spriteSlotMachineBack.getImageWidth()*0.35;
+    var tmp_y_scale = canvas_height/this.spriteSlotMachineBack.getImageHeight()*0.35;
 
     //Shrink the image the way, so it always fits the screen
     if(scale > tmp_y_scale){
@@ -112,6 +115,7 @@ SlotMachine.prototype.getScale = function(canvas_width,canvas_height){
 
     return scale;
 }
+
 
 SlotMachine.prototype.updatePosition = function(x,y,canvas_width,canvas_height){
 
@@ -182,6 +186,7 @@ SlotMachine.prototype.checkForWin = function(){
 	if(this.slots[0].position == this.slots[1].position && this.slots[1].position == this.slots[2].position){
 		this.credit += this.bet_size*this.win_multiplier;
 		console.log("You won "+this.bet_size*this.win_multiplier+" credits");
+		this.sn_coin.play();
 	}else{
 		console.log("You lost ");
 	}
@@ -214,4 +219,16 @@ SlotMachine.prototype.update = function(dt,x,y,canvas_width,canvas_height){
 	for(var i=0;i<this.slots.length;++i){
 		this.slots[i].update(dt);
 	}
+}
+
+SlotMachine.prototype.getEmotionColor = function(){
+	var g = 55;
+	var b = 55;
+	var r = 55+100-Math.min(this.display_credit/this.initial_credit,1)*100;
+	
+	r = Math.floor(r);
+	g = Math.floor(g);
+	b = Math.floor(b);
+
+	return "#"+r.toString(16)+g.toString(16)+b.toString(16);
 }

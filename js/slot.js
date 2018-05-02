@@ -40,7 +40,7 @@ Slot.prototype.update = function(dt){
 		case 'rolling':
 			this.time_elapsed += dt;	
 			var time_left = this.end_time - this.time_elapsed;		
-	
+			
 			//slow down at the end
 			if(time_left < 2.5 && time_left > 1){
 				this.speed = this.initial_speed*(time_left-this.stopTreshold)/this.end_time;

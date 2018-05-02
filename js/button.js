@@ -15,21 +15,24 @@ function Button(spr_src_press,spr_src_rel,spr_src_fail,release_callback,press_ca
 
 	this.fail = false;
 	this.reverseFail = this.reverseFail.bind(this);
-	this.buzz = new Audio("./assets/wrong.wav");
+	this.sn_buzz = new Audio("./assets/wrong.wav");
+	this.sn_press = new Audio("./assets/but_press.wav");
+	this.sn_release = new Audio("./assets/but_rel.wav");
 }
 
 Button.prototype.reverseFail = function(){
 	this.pressed = false;
 	this.fail = false; 
+	this.sn_release.play();
 	this.currentSprite = this.spriteReleased;
 }
 
 Button.prototype.failPress = function(){
-	this.buzz.play();
+	this.sn_buzz.play();
 	this.pressed = false;
 	this.fail = true;
 	this.currentSprite = this.spriteFail;
-	setTimeout(this.reverseFail,320);
+	setTimeout(this.reverseFail,250);
 }
 
 Button.prototype.updatePositionAndScale = function(x,y,x_scale,y_scale){
@@ -47,6 +50,8 @@ Button.prototype.release = function(){
 	if (this.fail)
 		return;
 
+	this.sn_release.play();
+
 	this.pressed = false;
 	this.currentSprite = this.spriteReleased;
 
@@ -58,6 +63,8 @@ Button.prototype.press = function(){
 	if (this.fail)
 		return;
 	
+	this.sn_press.play();
+
 	this.pressed = true;
 	this.currentSprite = this.spritePressed;
 	

@@ -67,7 +67,16 @@ function update(dt){
 
 
 function render(dt){
-    ctx.fillStyle = "#000000";
+
+    var col = slotMachine.getEmotionColor();
+
+    var grd=ctx.createRadialGradient(canvas.width/2,canvas.height/2,canvas.width/32,canvas.width/2,canvas.height/2,canvas.width/2);
+    grd.addColorStop(0,col);
+    grd.addColorStop(1,"black");
+
+    // Fill with gradient
+    ctx.fillStyle = grd;
     ctx.fillRect(0,0,canvas.width,canvas.height);
+
     slotMachine.draw(canvas,ctx,canvas.width/2,canvas.height/2)
 }
